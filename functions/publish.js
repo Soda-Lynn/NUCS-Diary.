@@ -3,13 +3,15 @@ export async function onRequestPost({ request, env }) {
     const data = await request.json();
     if (!data.content) return new Response("No content", { status: 400 });
 
-    // Generate random post ID
     const id = Math.random().toString(36).slice(2, 8);
+    const postData = JSON.stringify({
+      content: data.content,
+      title: data.title || "NUCS Diary Post",
+      ogImage: data.ogImage || ""
+    });
 
-    // Save HTML content in KV storage
-    await env.POSTS.put(id, data.content);
+    await env.POSTS.put(id, postData);
 
-    // Return JSON with post URL
     return new Response(JSON.stringify({ url: `/p/${id}` }), {
       headers: { "Content-Type": "application/json" }
     });
