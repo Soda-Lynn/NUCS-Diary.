@@ -3,7 +3,7 @@ export async function onRequestPost({ request, env }) {
     const data = await request.json();
     if (!data.content) return new Response("No content", { status: 400 });
 
-    const id = Math.random().toString(36).slice(2,8);
+    const id = Math.random().toString(36).slice(2, 8);
     const postData = JSON.stringify({
       content: data.content,
       title: data.title || "NUCS Diary Post",
