@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>AnonPost</title>
+  <title id="pageTitle">DiaryPost</title>
   <style>
     body {
       font-family: system-ui;
@@ -23,7 +23,12 @@ if (!hash) {
   document.getElementById("post").innerText = "Post not found.";
 } else {
   const parts = hash.split(":");
+
+  const title = parts[0] || "NUCS Diary Post";
   const content = decodeURIComponent(escape(atob(parts[1])));
+
+  document.title = title;
+  document.getElementById("pageTitle").textContent = title;
   document.getElementById("post").innerText = content;
 }
 </script>
