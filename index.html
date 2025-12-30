@@ -82,7 +82,8 @@ quill.getModule('toolbar').addHandler('video', customVideoHandler);
 
 async function publish() {
   const html = quill.root.innerHTML;
-  const title = document.getElementById('postTitle').value.trim() || "NUCS Diary Post";
+  const titleInput = document.getElementById('postTitle').value.trim();
+  const title = titleInput ? titleInput : "NUCS Diary Post";
   let ogImage = document.getElementById('ogImage').value.trim();
 
   if (!html || html === '<p><br></p>') return alert("Write something!");
