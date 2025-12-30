@@ -1,10 +1,19 @@
 export async function onRequestGet({ params, env }) {
-  const content = await env.POSTS.get(params.id);
-  if (!content) return new Response("Post not found", { status: 404 });
+  const postDataRaw = await env.POSTS.get(params.id);
+  if (!postDataRaw) return new Response("Post not found", { status: 404 });
+
+  const postData = JSON.parse(postDataRaw);
+  const content = postData.content;
+  const title = postData.title;
+  let ogImage = postData.ogImage;
+
+  // Auto pick first image if OG not set
+  if (!ogImage) {
+    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/i);
+    if (imgMatch) ogImage = imgMatch[1];
+  }
 
   const description = content.replace(/<[^>]*>/g, "").slice(0, 100);
-  const title = "NUCS Diary Post";
-  const ogImage = ""; // Optional: put GitHub raw image URL here
 
   return new Response(`
 <!DOCTYPE html>
@@ -18,22 +27,52 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}">` : ""}
 <meta property="og:type" content="article">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  /* Allow Telegram to apply theme */
   body {
     font-family: sans-serif;
     padding: 20px;
     line-height: 1.5;
-    background: none;
+    margin: 0;
+    background: inherit; /* adapt to Telegram IV theme */
     color: inherit;
   }
-  article { max-width: 700px; margin: auto; }
-  h1, h2, h3 { margin: 15px 0 10px; }
+  article {
+    max-width: 700px;
+    margin: auto;
+  }
+
+  /* Text formatting */
+  h1,h2,h3 { margin: 15px 0 10px; }
   p { margin: 10px 0; }
   strong { font-weight: bold; }
   em { font-style: italic; }
-  ul { margin: 10px 0 10px 20px; }
+  u { text-decoration: underline; }
+  s { text-decoration: line-through; }
+  a { color: #0645AD; text-decoration: underline; }
+  
+  /* Lists */
+  ul, ol { margin: 10px 0 10px 20px; }
   li { margin: 5px 0; }
-  img { max-width: 100%; height: auto; }
+
+  /* Images & videos */
+  img, video { max-width: 100%; height: auto; margin: 10px 0; }
+
+  /* Text alignments */
+  .ql-align-center { text-align: center; }
+  .ql-align-right { text-align: right; }
+  .ql-align-justify { text-align: justify; }
+
+  /* Font sizes */
+  .ql-size-small { font-size: 0.75em; }
+  .ql-size-large { font-size: 1.25em; }
+  .ql-size-huge { font-size: 1.5em; }
+
+  /* Colors applied by Quill */
+  .ql-color-red { color: red; }
+  .ql-color-blue { color: blue; }
+  .ql-color-green { color: green; }
+  .ql-bg-yellow { background-color: yellow; }
+  .ql-bg-pink { background-color: pink; }
+  /* Add more colors if needed */
 </style>
 </head>
 <body>
