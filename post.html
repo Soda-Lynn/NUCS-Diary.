@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AnonPost</title>
+  <style>
+    body {
+      font-family: system-ui;
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<div id="post"></div>
+
+<script>
+const hash = location.hash.substring(1);
+if (!hash) {
+  document.getElementById("post").innerText = "Post not found.";
+} else {
+  const parts = hash.split(":");
+  const content = decodeURIComponent(escape(atob(parts[1])));
+  document.getElementById("post").innerText = content;
+}
+</script>
+
+</body>
+</html>
