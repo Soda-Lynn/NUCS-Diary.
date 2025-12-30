@@ -12,15 +12,17 @@
     font-family: sans-serif;
     margin: 0;
     padding: 20px;
-    background: inherit;  
+    background: inherit;  /* theme adaptive */
     color: inherit;
   }
+
   #editor {
     height: 300px;
     background: inherit;
     color: inherit;
     padding: 10px;
   }
+
   label { display: block; margin-top: 10px; }
   input { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
   button { margin-top: 10px; padding: 8px 15px; }
@@ -38,7 +40,7 @@
 <div id="editor"></div>
 
 <label>
-  Preview image URL (optional for Telegram/OG preview):
+  Preview image URL (optional for Telegram link preview):
   <input type="text" id="ogImage" placeholder="https://example.com/preview.jpg">
 </label>
 
@@ -53,26 +55,28 @@ const quill = new Quill('#editor', {
   placeholder: 'Write your diary post...',
   modules: {
     toolbar: [
-      ['bold','italic','underline','strike'],
-      [{ 'header': [1,2,3,false] }],
-      ['link','image','video'],
-      [{ 'list':'ordered'}, {'list':'bullet'}],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'header': [1, 2, 3, false] }],
+      ['link', 'image', 'video'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
       [{ 'align': [] }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'size': ['small', false, 'large','huge'] }],
+      [{ 'color': [] }],
+      [{ 'background': [] }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
       ['clean']
     ]
   }
 });
 
-// Video upload handler
+// Custom video handler to insert <video> tag
 function customVideoHandler() {
   const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = 'video/mp4';
+  fileInput.setAttribute('type', 'file');
+  fileInput.setAttribute('accept', 'video/mp4');
   fileInput.onchange = async () => {
     const file = fileInput.files[0];
-    if(!file) return;
+    if (!file) return;
+    // Upload file to server or Cloudflare Pages
     const formData = new FormData();
     formData.append('video', file);
     const res = await fetch('/upload-video', { method: 'POST', body: formData });
@@ -85,6 +89,7 @@ function customVideoHandler() {
   };
   fileInput.click();
 }
+
 quill.getModule('toolbar').addHandler('video', customVideoHandler);
 
 async function publish() {
@@ -94,10 +99,9 @@ async function publish() {
 
   if (!html || html === '<p><br></p>') return alert("Write something!");
 
-  // Fallback for OG image
-  if(!ogImage){
+  if (!ogImage) {
     const imgMatch = html.match(/<img[^>]+src="([^">]+)"/i);
-    if(imgMatch) ogImage = imgMatch[1];
+    if (imgMatch) ogImage = imgMatch[1];
   }
 
   const postData = { content: html, title, ogImage };
@@ -109,14 +113,14 @@ async function publish() {
       body: JSON.stringify(postData)
     });
 
-    if(!res.ok){
+    if (!res.ok) {
       const err = await res.json();
       return alert("Publish failed: " + (err.error || res.status));
     }
 
     const data = await res.json();
     window.location.href = window.location.origin + data.url;
-  } catch(e){
+  } catch (e) {
     alert("Publish error: " + e.message);
   }
 }
